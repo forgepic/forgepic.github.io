@@ -22,4 +22,4 @@ Disallow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://cardforgep.github.io/forgepic/sitemap.xml
+Sitemap: https://forgepic.github.io/sitemap.xml
