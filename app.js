@@ -42,8 +42,25 @@
   $("authSubmit").addEventListener("click",async()=>{const email=$("authEmail").value.trim(),password=$("authPassword").value,confirm=$("authPasswordConfirm").value;clearStatus($("authStatus"));if(!email||password.length<8)return status($("authStatus"),lang==="ru"?"Введите email и пароль не короче 8 символов.":lang==="de"?"E-Mail und ein Passwort mit mindestens 8 Zeichen eingeben.":"Enter your email and a password of at least 8 characters.");if(authMode==="register"&&password!==confirm)return status($("authStatus"),lang==="ru"?"Пароли не совпадают.":lang==="de"?"Die Passwörter stimmen nicht überein.":"Passwords do not match.");if(authMode==="register"&&!$("authTerms").checked)return status($("authStatus"),tr("billingTerms"));const btn=$("authSubmit");btn.disabled=true;try{const d=await api(`/api/auth/${authMode==="register"?"register":"login"}`,{method:"POST",body:JSON.stringify({email,password,termsAccepted:authMode==="register",visitorId,clientTimezone,language:lang})});token=d.token;localStorage.setItem(TOKEN_KEY,token);account=d.user;modal("authModal",false);syncAccountUI();toast(authMode==="register"?tr("accountCreated"):tr("loggedIn"),"good");track(authMode==="register"?"register_success":"login_success")}catch(e){status($("authStatus"),safePublicError(e))}finally{btn.disabled=false;refreshAuthCopy()}});
   $("accountBtn").addEventListener("click",()=>modal("accountModal",true));$("buyBtn").addEventListener("click",()=>{modal("accountModal",false);openBilling()});$("logoutBtn").addEventListener("click",async()=>{try{await api("/api/auth/logout",{method:"POST"},true)}catch{}token="";localStorage.removeItem(TOKEN_KEY);account=null;modal("accountModal",false);syncAccountUI()});
   const allowedImageTypes=new Set(["image/jpeg","image/png","image/webp"]);const maxImageBytes=10*1024*1024;
-  function clearSelectedImage(){selectedImageFile=null;if(selectedImageUrl)URL.revokeObjectURL(selectedImageUrl);selectedImageUrl=null;$("imageInput").value="";show($("uploadPreview"),false);$("uploadPanel").classList.remove("has-image")}
-  function useImageFile(file){clearStatus($("generateStatus"));if(!file||!allowedImageTypes.has(file.type)||file.size<=0||file.size>maxImageBytes){clearSelectedImage();status($("generateStatus"),tr("badPhoto"));return}selectedImageFile=file;if(selectedImageUrl)URL.revokeObjectURL(selectedImageUrl);selectedImageUrl=URL.createObjectURL(file);$("uploadPreviewImage").src=selectedImageUrl;$("uploadFileName").textContent=file.name||"photo";$("uploadFileInfo").textContent=`${(file.size/1024/1024).toFixed(1)} MB · ${file.type.replace("image/","").toUpperCase()}`;show($("uploadPreview"),true);$("uploadPanel").classList.add("has-image");pendingKey=null}
+  function clearSelectedImage(){selectedImageFile=null;selectedImageUrl=null;$("uploadPreviewImage").removeAttribute("src");$("imageInput").value="";show($("uploadPreview"),false);$("uploadPanel").classList.remove("has-image")}
+  function useImageFile(file){
+    clearStatus($("generateStatus"));
+    if(!file||!allowedImageTypes.has(file.type)||file.size<=0||file.size>maxImageBytes){clearSelectedImage();status($("generateStatus"),tr("badPhoto"));return}
+    selectedImageFile=file;
+    $("uploadFileName").textContent=file.name||"photo";
+    $("uploadFileInfo").textContent=`${(file.size/1024/1024).toFixed(1)} MB · ${file.type.replace("image/","").toUpperCase()}`;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      if(selectedImageFile!==file)return;
+      selectedImageUrl=typeof reader.result==="string"?reader.result:null;
+      if(selectedImageUrl)$("uploadPreviewImage").src=selectedImageUrl;
+      show($("uploadPreview"),Boolean(selectedImageUrl));
+      $("uploadPanel").classList.toggle("has-image",Boolean(selectedImageUrl));
+    };
+    reader.onerror=()=>{if(selectedImageFile===file){clearSelectedImage();status($("generateStatus"),tr("badPhoto"));}};
+    reader.readAsDataURL(file);
+    pendingKey=null;
+  }
   $("uploadDrop").addEventListener("click",()=>$("imageInput").click());$("imageInput").addEventListener("change",e=>useImageFile(e.target.files?.[0]));$("removeImageBtn").addEventListener("click",clearSelectedImage);["dragenter","dragover"].forEach(name=>$("uploadDrop").addEventListener(name,e=>{e.preventDefault();$("uploadDrop").classList.add("dragover")}));["dragleave","drop"].forEach(name=>$("uploadDrop").addEventListener(name,e=>{e.preventDefault();$("uploadDrop").classList.remove("dragover")}));$("uploadDrop").addEventListener("drop",e=>useImageFile(e.dataTransfer?.files?.[0]));
     document.querySelectorAll("#styleOptions .choice").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("#styleOptions .choice").forEach(x=>x.classList.remove("active"));b.classList.add("active");selectedStyle=b.dataset.style}));document.querySelectorAll("#sizeOptions .choice").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("#sizeOptions .choice").forEach(x=>x.classList.remove("active"));b.classList.add("active");selectedSize=b.dataset.size}));
   $("promptInput").addEventListener("input",e=>$("promptCount").textContent=String(e.target.value.length));
