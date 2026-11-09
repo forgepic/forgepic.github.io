@@ -12,8 +12,10 @@
   <meta property="og:description" content="Опишите идею — ForgePic создаст готовое изображение. Первое изображение бесплатно.">
   <meta property="og:url" content="https://forgepic.github.io/">
   <meta name="theme-color" content="#ffffff">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://31.76.56.162; font-src 'self' data:; form-action 'self'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%236f5cff' d='M32 2c4 16 14 26 30 30-16 4-26 14-30 30C28 46 18 36 2 32 18 28 28 18 32 2Z'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./styles.css?v=1.0.1">
+  <link rel="stylesheet" href="./styles.css?v=1.1.0">
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -64,6 +66,23 @@
           <textarea id="promptInput" maxlength="2000" data-i18n-placeholder="promptPlaceholder" placeholder="Например: Космический город ночью, неоновые вывески, мокрый асфальт, кинематографичный свет..."></textarea>
           <span class="counter"><span id="promptCount">0</span>/2000</span>
         </div>
+
+        <section class="upload-panel" id="uploadPanel">
+          <div class="upload-copy">
+            <strong data-i18n="uploadTitle">Добавить своё фото</strong>
+            <span data-i18n="uploadLead">Необязательно. JPG, PNG или WEBP до 10 МБ. Фото обрабатывается в памяти и не публикуется.</span>
+          </div>
+          <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+          <button type="button" class="upload-drop" id="uploadDrop">
+            <span class="upload-icon">＋</span>
+            <span data-i18n="uploadButton">Выбрать фото или перетащить сюда</span>
+          </button>
+          <div class="upload-preview" id="uploadPreview" hidden>
+            <img id="uploadPreviewImage" alt="Предпросмотр загруженного фото">
+            <div><strong id="uploadFileName"></strong><small id="uploadFileInfo"></small></div>
+            <button type="button" class="btn btn-soft upload-remove" id="removeImageBtn" data-i18n="removePhoto">Удалить</button>
+          </div>
+        </section>
 
         <fieldset>
           <legend data-i18n="style">Стиль</legend>
@@ -188,7 +207,7 @@
   <div class="modal" id="legalModal" hidden><div class="modal-backdrop" data-close="legal"></div><div class="modal-card legal-card"><button class="modal-x" data-close="legal">×</button><div id="legalContent"></div></div></div>
 
   <div class="toast" id="toast" hidden></div>
-  <script src="./config.js?v=1.0.1"></script>
-  <script src="./app.js?v=1.0.1"></script>
+  <script src="./config.js?v=1.1.0"></script>
+  <script src="./app.js?v=1.1.0"></script>
 </body>
 </html>
